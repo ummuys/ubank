@@ -1,13 +1,10 @@
 package main
 
 import (
-	midl "murweb/internal/middleware"
-	"murweb/internal/tools"
-	hand "murweb/internal/web/handlers"
-	"murweb/repository"
 	"os"
-
-	"github.com/gin-gonic/gin"
+	"ubank/internal/router"
+	"ubank/internal/tools"
+	"ubank/repository"
 )
 
 func main() {
@@ -28,21 +25,10 @@ func main() {
 
 	db, err := repository.NewDBConn(os.Getenv("PG_CONN"), "test", "Users")
 	if err != nil {
-		logger.Fatal(err.Error())
+		logger.Error(err.Error())
 		panic(err)
 	}
 	defer db.Close()
 
-	g := gin.Default()
-	g.Use(midl.AddZapLogger(logger))
-
-	login := g.Group("/me")
-	login.Use(midl.JWTRequest())
-	login.GET("", hand.CheckTokenHand)
-	login.POST("/deposite", hand.DepositeHand(db))
-	login.GET("/balance", hand.GetBalanceHand(db))
-	login.POST("/transfer", hand.TransferMoneyHand(db))
-	g.POST("/auth", hand.Auth(db))
-	g.POST("/reg", hand.Reg(db))
-	g.Run()
+	router.InitRouter(logger, db)
 }

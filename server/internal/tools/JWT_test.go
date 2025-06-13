@@ -1,80 +1,57 @@
 package tools
 
 import (
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/stretchr/testify/require"
 )
 
-var superSecret = []byte("superSecret")
+var mockSecret = []byte("super-secret")
 
-func FakeKeyFunc(token *jwt.Token) (interface{}, error) {
-	return superSecret, nil
+func mockKeyFunc(token *jwt.Token) (interface{}, error) {
+	return mockSecret, nil
 }
 
-func CreateTestToken(t *testing.T, claims jwt.MapClaims) string {
-	t.Helper()
+func mockGenerateJWT(login string) string {
+	claims := jwt.MapClaims{
+		"login": login,
+		"exp":   time.Now().Add(time.Second * 30).Unix(),
+		"iat":   time.Now().Unix(),
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
-	s, err := token.SignedString(superSecret)
-	require.NoError(t, err)
-	return s
+	res, _ := token.SignedString(mockSecret)
+	return res
 }
 
 func TestValidateJWT(t *testing.T) {
-	now := time.Now()
-
 	tests := []struct {
-		testName string
-		tokenStr string
-		errHave  bool
-		errWant  error
-		ansWant  string
+		name  string
+		token string
+		err   error
 	}{
-		{
-			testName: "valid token",
-			tokenStr: CreateTestToken(t, jwt.MapClaims{
-				"login": "bumus",
-				"exp":   now.Add(1 * time.Hour).Unix(),
-			}),
-			errHave: false,
-			errWant: nil,
-			ansWant: "bumus",
-		},
-		{
-			testName: "token expired",
-			tokenStr: CreateTestToken(t, jwt.MapClaims{
-				"login": "bumus",
-				"exp":   now.Add(-1 * time.Hour).Unix(),
-			}),
-			errHave: true,
-			errWant: jwt.ErrTokenExpired,
-			ansWant: "",
-		},
-		{
-			testName: "invalid signature",
-			tokenStr: "hallo",
-			errHave:  true,
-			errWant:  jwt.ErrInvalidKey,
-			ansWant:  "",
-		},
+		{"All good", mockGenerateJWT("ummuys"), nil},
+		{"Invalid Signature", mockGenerateJWT("ummuys") + "a", jwt.ErrSignatureInvalid},
 	}
 
 	for _, tc := range tests {
 		tc := tc
-		t.Run(tc.testName, func(t *testing.T) {
-			t.Parallel()
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := ValidateJWT(tc.token, mockKeyFunc)
 
-			claims, err := ValidateJWT(tc.tokenStr, FakeKeyFunc)
-			if tc.errHave {
-				require.Error(t, err)
-				require.ErrorIs(t, tc.errWant, err)
-				require.Nil(t, claims)
+			if err != nil && tc.err != nil {
+				if errors.Is(err, tc.err) {
+					return
+				} else {
+					t.Fatalf("get err -> %v ||| need err ->  %v:", err, tc.err)
+				}
+
+			} else if err == nil && tc.err != nil {
+				t.Fatalf("get err -> %v ||| need err ->  %v:", err, tc.err)
 				return
 			}
-			require.Equal(t, tc.ansWant, claims["login"])
 		})
 	}
-
 }

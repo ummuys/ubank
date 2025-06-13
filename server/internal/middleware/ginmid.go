@@ -1,9 +1,9 @@
-package ginmid
+package middleware
 
 import (
-	"murweb/internal/tools"
 	"net/http"
 	"strings"
+	"ubank/internal/tools"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -25,14 +25,14 @@ func JWTRequest() gin.HandlerFunc {
 	return func(g *gin.Context) {
 		header := g.GetHeader("Authorization")
 		if !strings.HasPrefix(header, "Bearer ") {
-			g.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "missing or invalid token"})
+			g.JSON(http.StatusUnauthorized, gin.H{"message": "missing or invalid token"})
 			return
 		}
 
 		token := strings.TrimPrefix(header, "Bearer ")
 		claims, err := tools.ValidateJWT(token, tools.KeyFunc)
 		if err != nil {
-			g.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "invalid or expired token"})
+			g.JSON(http.StatusUnauthorized, gin.H{"message": "invalid or expired token"})
 			return
 		}
 

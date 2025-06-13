@@ -1,4 +1,4 @@
-module murweb
+module ubank
 
 go 1.24.2
 

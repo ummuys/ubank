@@ -1,11 +1,11 @@
 package service
 
 import (
-	"murweb/internal/models"
-	"murweb/internal/tools"
-	msg "murweb/messages"
-	repos "murweb/repository"
 	"net/http"
+	"ubank/internal/models"
+	"ubank/internal/tools"
+	msg "ubank/messages"
+	repos "ubank/repository"
 )
 
 func RegUser(db repos.DataBase, user models.RegRequest) (int, error) {

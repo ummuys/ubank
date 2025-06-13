@@ -3,8 +3,8 @@ package service
 import (
 	"errors"
 	"fmt"
-	"murweb/repository"
 	"strconv"
+	"ubank/repository"
 )
 
 func DepositeUser(db repository.DataBase, login string, amount string) error {
@@ -39,7 +39,7 @@ func TransferMoney(db repository.DataBase, loginFrom, loginTo string, amount str
 	}
 
 	if currCash-amountInt < 0 {
-		return errors.New("Unable to complete transaction: balance is insufficient")
+		return errors.New("unable to complete transaction: balance is insufficient")
 	}
 
 	if exists, err := db.CheckExistsUser(loginTo); err != nil {

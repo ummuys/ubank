@@ -1,14 +1,14 @@
 package handlers
 
 import (
-	"murweb/internal/models"
-	"murweb/internal/service"
-	"murweb/internal/tools"
-	"murweb/messages"
-	"murweb/repository"
 	"net/http"
 	"strconv"
 	"strings"
+	"ubank/internal/models"
+	"ubank/internal/service"
+	"ubank/internal/tools"
+	"ubank/messages"
+	"ubank/repository"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

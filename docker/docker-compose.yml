@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: pg-db
+    restart: "no"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1111
+      POSTGRES_DB: ubankdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - /home/ummuys/ubank/docker/data:/var/lib/postgresql/data
+  
+volumes:
+  data:
